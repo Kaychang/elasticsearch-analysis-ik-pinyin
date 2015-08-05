@@ -31,7 +31,7 @@
     </parent>
 
     <properties>
-        <elasticsearch.version>1.6.2</elasticsearch.version>
+        <elasticsearch.version>1.6.0</elasticsearch.version>
     </properties>
 
   <repositories>
@@ -89,6 +89,11 @@
             <artifactId>lucene-core</artifactId>
             <version>4.10.4</version>
         </dependency>
+		<dependency>
+			<groupId>com.github.stuxuhai</groupId>
+			<artifactId>jpinyin</artifactId>
+			<version>1.0</version>
+		</dependency>
     </dependencies>
 
     <build>

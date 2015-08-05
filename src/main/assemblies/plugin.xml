@@ -20,6 +20,7 @@
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <includes>
                 <include>org.apache.httpcomponents:httpclient</include>
+                <include>com.github.stuxuhai:jpinyin</include>
             </includes>
         </dependencySet>
     </dependencySets>

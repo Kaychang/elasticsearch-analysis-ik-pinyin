@@ -34,9 +34,12 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.wltea.analyzer.core.IKSegmenter;
 import org.wltea.analyzer.core.Lexeme;
+import org.wltea.analyzer.core.PinyinTokensHolder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
+
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
 /**
@@ -44,6 +47,9 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
  * 兼容Lucene 4.0版本
  */
 public final class IKTokenizer extends Tokenizer {
+	
+	private Settings settings;
+	private Environment environment;
 	
 	//IK分词器实现
 	private IKSegmenter _IKImplement;
@@ -73,6 +79,8 @@ public final class IKTokenizer extends Tokenizer {
 	    typeAtt = addAttribute(TypeAttribute.class);
         posIncrAtt = addAttribute(PositionIncrementAttribute.class);
 
+        this.settings = settings;
+        this.environment = environment;
         _IKImplement = new IKSegmenter(input , settings, environment);
 	}
 
@@ -105,6 +113,39 @@ public final class IKTokenizer extends Tokenizer {
 			//返会true告知还有下个词元
 			return true;
 		}
+		
+		// 添加拼音token
+		PinyinTokensHolder holder = new PinyinTokensHolder();
+		IKSegmenter pinyinIKSegmenter = holder.getIkSegmenter();
+		if (pinyinIKSegmenter == null) {
+			String tokens = holder.getPinyins();
+			pinyinIKSegmenter = new IKSegmenter(new StringReader(tokens),
+					settings, environment);
+			holder.setIkSegmenter(pinyinIKSegmenter);
+		}
+		
+		Lexeme nextLexemePY = pinyinIKSegmenter.next();
+		if(nextLexemePY != null){
+            posIncrAtt.setPositionIncrement(skippedPositions +1 );
+
+			//将Lexeme转成Attributes
+			//设置词元文本
+			termAtt.append(nextLexemePY.getLexemeText());
+			//设置词元长度
+			termAtt.setLength(nextLexemePY.getLength());
+			//设置词元位移
+//			offsetAtt.setOffset(nextLexeme.getBeginPosition(), nextLexeme.getEndPosition());
+            offsetAtt.setOffset(endPosition + correctOffset(nextLexemePY.getBeginPosition()),
+            		endPosition + correctOffset(nextLexemePY.getEndPosition()));
+
+            //记录分词的最后位置
+			endPosition = endPosition + nextLexemePY.getEndPosition();
+			//记录词元分类
+			typeAtt.setType(nextLexemePY.getLexemeTypeString());			
+			//返会true告知还有下个词元
+			return true;
+		}
+		
 		//返会false告知词元输出完毕
 		return false;
 	}

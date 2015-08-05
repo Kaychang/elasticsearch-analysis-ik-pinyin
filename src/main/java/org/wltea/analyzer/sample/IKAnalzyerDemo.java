@@ -49,8 +49,9 @@ public class IKAnalzyerDemo {
 		//获取Lucene的TokenStream对象
 	    TokenStream ts = null;
 		try {
-			ts = analyzer.tokenStream("myfield", new StringReader("WORLD ,.. html DATA</html>HELLO"));
+//			ts = analyzer.tokenStream("myfield", new StringReader("WORLD ,.. html DATA</html>HELLO"));
 //			ts = analyzer.tokenStream("myfield", new StringReader("这是一个中文分词的例子，你可以直接运行它！IKAnalyer can analysis english text too"));
+			ts = analyzer.tokenStream("myfield", new StringReader("麻麻们团购宝宝中筒袜啦！pinyin hanyu Contribute index to jpinyin development by creating an account on GitHub"));
 			//获取词元位置属性
 		    OffsetAttribute  offset = ts.addAttribute(OffsetAttribute.class); 
 		    //获取词元文本属性

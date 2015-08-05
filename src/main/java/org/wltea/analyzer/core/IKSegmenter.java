@@ -28,6 +28,9 @@ import org.elasticsearch.env.Environment;
 import org.wltea.analyzer.cfg.Configuration;
 import org.wltea.analyzer.dic.Dictionary;
 
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -52,7 +55,7 @@ public final class IKSegmenter {
     private  boolean useSmart = false;
 	
 
-	/**
+    /**
 	 * IK分词器构造函数
 	 * @param input
      */
@@ -153,6 +156,20 @@ public final class IKSegmenter {
 			//记录本次分词的缓冲区位移
 			context.markBufferOffset();			
 		}
+		
+		// 设置拼音token
+		if (l != null) {
+			if (Lexeme.TYPE_CNWORD == l.getLexemeType() ||
+					Lexeme.TYPE_CNCHAR == l.getLexemeType()) {
+				PinyinTokensHolder holder = new PinyinTokensHolder();
+				String pinyin = PinyinHelper.convertToPinyinString(l.getLexemeText(),
+						"", PinyinFormat.WITHOUT_TONE) + ",";
+				String pinyinTokens = holder.getPinyins();
+				pinyinTokens += pinyin;
+				holder.setPinyins(pinyinTokens);
+			}
+		}
+		
 		return l;
 	}
 
