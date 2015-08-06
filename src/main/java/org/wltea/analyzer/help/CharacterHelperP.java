@@ -1,7 +1,7 @@
 
 package org.wltea.analyzer.help;
 
-public class CharacterHelper {
+public class CharacterHelperP {
 
 	public static boolean isSpaceLetter(char input){
 		return input == 8 || input == 9 

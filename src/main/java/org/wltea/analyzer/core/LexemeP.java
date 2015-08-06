@@ -27,7 +27,7 @@ package org.wltea.analyzer.core;
 /**
  * IK词元对象 
  */
-public class Lexeme implements Comparable<Lexeme>{
+public class LexemeP implements Comparable<LexemeP>{
 	//lexemeType常量
 	//未知
 	public static final int TYPE_UNKNOWN = 0;
@@ -62,7 +62,7 @@ public class Lexeme implements Comparable<Lexeme>{
     private int lexemeType;
     
     
-	public Lexeme(int offset , int begin , int length , int lexemeType){
+	public LexemeP(int offset , int begin , int length , int lexemeType){
 		this.offset = offset;
 		this.begin = begin;
 		if(length < 0){
@@ -86,8 +86,8 @@ public class Lexeme implements Comparable<Lexeme>{
 			return true;
 		}
 		
-		if(o instanceof Lexeme){
-			Lexeme other = (Lexeme)o;
+		if(o instanceof LexemeP){
+			LexemeP other = (LexemeP)o;
 			if(this.offset == other.getOffset()
 					&& this.begin == other.getBegin()
 					&& this.length == other.getLength()){
@@ -114,7 +114,7 @@ public class Lexeme implements Comparable<Lexeme>{
      * 词元在排序集合中的比较算法
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-	public int compareTo(Lexeme other) {
+	public int compareTo(LexemeP other) {
 		//起始位置优先
         if(this.begin < other.getBegin()){
             return -1;
@@ -258,7 +258,7 @@ public class Lexeme implements Comparable<Lexeme>{
 	 * @param lexemeType
 	 * @return boolean 词元是否成功合并
 	 */
-	public boolean append(Lexeme l , int lexemeType){
+	public boolean append(LexemeP l , int lexemeType){
 		if(l != null && this.getEndPosition() == l.getBeginPosition()){
 			this.length += l.getLength();
 			this.lexemeType = lexemeType;

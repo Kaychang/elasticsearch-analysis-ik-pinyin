@@ -29,7 +29,7 @@ package org.wltea.analyzer.core;
  *
  * 字符集识别工具类
  */
-class CharacterUtil {
+class CharacterUtilP {
 	
 	public static final int CHAR_USELESS = 0;
 	

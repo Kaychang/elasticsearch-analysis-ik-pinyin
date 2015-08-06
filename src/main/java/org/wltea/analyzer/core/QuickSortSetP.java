@@ -27,7 +27,7 @@ package org.wltea.analyzer.core;
 /**
  * IK分词器专用的Lexem快速排序集合
  */
-class QuickSortSet {
+class QuickSortSetP {
 	//链表头
 	private Cell head;
 	//链表尾
@@ -35,7 +35,7 @@ class QuickSortSet {
 	//链表的实际大小
 	private int size;
 	
-	QuickSortSet(){
+	QuickSortSetP(){
 		this.size = 0;
 	}
 	
@@ -43,7 +43,7 @@ class QuickSortSet {
 	 * 向链表集合添加词元
 	 * @param lexeme
 	 */
-	boolean addLexeme(Lexeme lexeme){
+	boolean addLexeme(LexemeP lexeme){
 		Cell newCell = new Cell(lexeme); 
 		if(this.size == 0){
 			this.head = newCell;
@@ -95,7 +95,7 @@ class QuickSortSet {
 	 * 返回链表头部元素
 	 * @return
 	 */
-	Lexeme peekFirst(){
+	LexemeP peekFirst(){
 		if(this.head != null){
 			return this.head.lexeme;
 		}
@@ -106,15 +106,15 @@ class QuickSortSet {
 	 * 取出链表集合的第一个元素
 	 * @return Lexeme
 	 */
-	Lexeme pollFirst(){
+	LexemeP pollFirst(){
 		if(this.size == 1){
-			Lexeme first = this.head.lexeme;
+			LexemeP first = this.head.lexeme;
 			this.head = null;
 			this.tail = null;
 			this.size--;
 			return first;
 		}else if(this.size > 1){
-			Lexeme first = this.head.lexeme;
+			LexemeP first = this.head.lexeme;
 			this.head = this.head.next;
 			this.size --;
 			return first;
@@ -127,7 +127,7 @@ class QuickSortSet {
 	 * 返回链表尾部元素
 	 * @return
 	 */
-	Lexeme peekLast(){
+	LexemeP peekLast(){
 		if(this.tail != null){
 			return this.tail.lexeme;
 		}
@@ -138,16 +138,16 @@ class QuickSortSet {
 	 * 取出链表集合的最后一个元素
 	 * @return Lexeme
 	 */
-	Lexeme pollLast(){
+	LexemeP pollLast(){
 		if(this.size == 1){
-			Lexeme last = this.head.lexeme;
+			LexemeP last = this.head.lexeme;
 			this.head = null;
 			this.tail = null;
 			this.size--;
 			return last;
 			
 		}else if(this.size > 1){
-			Lexeme last = this.tail.lexeme;
+			LexemeP last = this.tail.lexeme;
 			this.tail = this.tail.prev;
 			this.size--;
 			return last;
@@ -211,9 +211,9 @@ class QuickSortSet {
 	class Cell implements Comparable<Cell>{
 		private Cell prev;
 		private Cell next;
-		private Lexeme lexeme;
+		private LexemeP lexeme;
 		
-		Cell(Lexeme lexeme){
+		Cell(LexemeP lexeme){
 			if(lexeme == null){
 				throw new IllegalArgumentException("lexeme must not be null");
 			}
@@ -232,7 +232,7 @@ class QuickSortSet {
 			return this.next;
 		}
 		
-		public Lexeme getLexeme(){
+		public LexemeP getLexeme(){
 			return this.lexeme;
 		}
 	}

@@ -36,7 +36,7 @@ import org.elasticsearch.env.Environment;
  * IK分词器，Lucene Analyzer接口实现
  * 兼容Lucene 4.0版本
  */
-public final class IKAnalyzer extends Analyzer{
+public final class IKAnalyzerP extends Analyzer{
 	
 	private boolean useSmart;
 	
@@ -53,7 +53,7 @@ public final class IKAnalyzer extends Analyzer{
 	 * 
 	 * 默认细粒度切分算法
 	 */
-	public IKAnalyzer(){
+	public IKAnalyzerP(){
 		this(false);
 	}
 	
@@ -62,7 +62,7 @@ public final class IKAnalyzer extends Analyzer{
 	 * 
 	 * @param useSmart 当为true时，分词器进行智能切分
 	 */
-	public IKAnalyzer(boolean useSmart){
+	public IKAnalyzerP(boolean useSmart){
 		super();
 		this.useSmart = useSmart;
 	}
@@ -70,7 +70,7 @@ public final class IKAnalyzer extends Analyzer{
     Settings settings=ImmutableSettings.EMPTY;
     Environment environment=new Environment();
 
-    public IKAnalyzer(Settings indexSetting,Settings settings, Environment environment) {
+    public IKAnalyzerP(Settings indexSetting,Settings settings, Environment environment) {
         super();
         this.settings=settings;
         this.environment= environment;
@@ -81,7 +81,7 @@ public final class IKAnalyzer extends Analyzer{
 	 */
 	@Override
 	protected TokenStreamComponents createComponents(String fieldName, final Reader in) {
-		Tokenizer _IKTokenizer = new IKTokenizer(in , settings, environment);
+		Tokenizer _IKTokenizer = new IKTokenizerP(in , settings, environment);
 		return new TokenStreamComponents(_IKTokenizer);
 	}
 

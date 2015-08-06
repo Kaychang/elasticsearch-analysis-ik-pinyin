@@ -1,4 +1,4 @@
-IK Analysis for ElasticSearch
+IK Analysis for ElasticSearch Along with Pinyin
 ==================================
 
 更新说明：

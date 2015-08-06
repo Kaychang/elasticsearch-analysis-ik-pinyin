@@ -1,6 +1,6 @@
 package org.wltea.analyzer.help;
 
-public class Sleep {
+public class SleepP {
 	public enum Type{MSEC,SEC,MIN,HOUR};
 	public static void sleep(Type type,int num){
 		try {

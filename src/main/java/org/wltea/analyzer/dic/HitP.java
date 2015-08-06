@@ -28,7 +28,7 @@ package org.wltea.analyzer.dic;
 /**
  * 表示一次词典匹配的命中
  */
-public class Hit {
+public class HitP {
 	//Hit不匹配
 	private static final int UNMATCH = 0x00000000;
 	//Hit完全匹配
@@ -41,7 +41,7 @@ public class Hit {
 	private int hitState = UNMATCH;
 	
 	//记录词典匹配过程中，当前匹配到的词典分支节点
-	private DictSegment matchedDictSegment; 
+	private DictSegmentP matchedDictSegment; 
 	/*
 	 * 词段开始位置
 	 */
@@ -90,11 +90,11 @@ public class Hit {
 		this.hitState = UNMATCH;
 	}
 	
-	public DictSegment getMatchedDictSegment() {
+	public DictSegmentP getMatchedDictSegment() {
 		return matchedDictSegment;
 	}
 	
-	public void setMatchedDictSegment(DictSegment matchedDictSegment) {
+	public void setMatchedDictSegment(DictSegmentP matchedDictSegment) {
 		this.matchedDictSegment = matchedDictSegment;
 	}
 	

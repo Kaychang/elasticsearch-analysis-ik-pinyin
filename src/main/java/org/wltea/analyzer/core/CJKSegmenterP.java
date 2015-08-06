@@ -25,8 +25,8 @@
  */
 package org.wltea.analyzer.core;
 
-import org.wltea.analyzer.dic.Dictionary;
-import org.wltea.analyzer.dic.Hit;
+import org.wltea.analyzer.dic.DictionaryP;
+import org.wltea.analyzer.dic.HitP;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,33 +35,33 @@ import java.util.List;
 /**
  *  中文-日韩文子分词器
  */
-class CJKSegmenter implements ISegmenter {
+class CJKSegmenterP implements ISegmenterP {
 	
 	//子分词器标签
 	static final String SEGMENTER_NAME = "CJK_SEGMENTER";
 	//待处理的分词hit队列
-	private List<Hit> tmpHits;
+	private List<HitP> tmpHits;
 	
 	
-	CJKSegmenter(){
-		this.tmpHits = new LinkedList<Hit>();
+	CJKSegmenterP(){
+		this.tmpHits = new LinkedList<HitP>();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.wltea.analyzer.core.ISegmenter#analyze(org.wltea.analyzer.core.AnalyzeContext)
 	 */
-	public void analyze(AnalyzeContext context) {
-		if(CharacterUtil.CHAR_USELESS != context.getCurrentCharType()){
+	public void analyze(AnalyzeContextP context) {
+		if(CharacterUtilP.CHAR_USELESS != context.getCurrentCharType()){
 			
 			//优先处理tmpHits中的hit
 			if(!this.tmpHits.isEmpty()){
 				//处理词段队列
-				Hit[] tmpArray = this.tmpHits.toArray(new Hit[this.tmpHits.size()]);
-				for(Hit hit : tmpArray){
-					hit = Dictionary.getSingleton().matchWithHit(context.getSegmentBuff(), context.getCursor() , hit);
+				HitP[] tmpArray = this.tmpHits.toArray(new HitP[this.tmpHits.size()]);
+				for(HitP hit : tmpArray){
+					hit = DictionaryP.getSingleton().matchWithHit(context.getSegmentBuff(), context.getCursor() , hit);
 					if(hit.isMatch()){
 						//输出当前的词
-						Lexeme newLexeme = new Lexeme(context.getBufferOffset() , hit.getBegin() , context.getCursor() - hit.getBegin() + 1 , Lexeme.TYPE_CNWORD);
+						LexemeP newLexeme = new LexemeP(context.getBufferOffset() , hit.getBegin() , context.getCursor() - hit.getBegin() + 1 , LexemeP.TYPE_CNWORD);
 						context.addLexeme(newLexeme);
 						
 						if(!hit.isPrefix()){//不是词前缀，hit不需要继续匹配，移除
@@ -77,10 +77,10 @@ class CJKSegmenter implements ISegmenter {
 			
 			//*********************************
 			//再对当前指针位置的字符进行单字匹配
-			Hit singleCharHit = Dictionary.getSingleton().matchInMainDict(context.getSegmentBuff(), context.getCursor(), 1);
+			HitP singleCharHit = DictionaryP.getSingleton().matchInMainDict(context.getSegmentBuff(), context.getCursor(), 1);
 			if(singleCharHit.isMatch()){//首字成词
 				//输出当前的词
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , context.getCursor() , 1 , Lexeme.TYPE_CNWORD);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , context.getCursor() , 1 , LexemeP.TYPE_CNWORD);
 				context.addLexeme(newLexeme);
 
 				//同时也是词前缀

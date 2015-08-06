@@ -30,7 +30,7 @@ import java.util.Arrays;
  * 
  * 英文字符及阿拉伯数字子分词器
  */
-class LetterSegmenter implements ISegmenter {
+class LetterSegmenterP implements ISegmenterP {
 	
 	//子分词器标签
 	static final String SEGMENTER_NAME = "LETTER_SEGMENTER";
@@ -72,7 +72,7 @@ class LetterSegmenter implements ISegmenter {
 	 */
 	private int arabicEnd;
 	
-	LetterSegmenter(){
+	LetterSegmenterP(){
 		Arrays.sort(Letter_Connector);
 		Arrays.sort(Num_Connector);
 		this.start = -1;
@@ -87,7 +87,7 @@ class LetterSegmenter implements ISegmenter {
 	/* (non-Javadoc)
 	 * @see org.wltea.analyzer.core.ISegmenter#analyze(org.wltea.analyzer.core.AnalyzeContext)
 	 */
-	public void analyze(AnalyzeContext context) {
+	public void analyze(AnalyzeContextP context) {
 		boolean bufferLockFlag = false;
 		//处理英文字母
 		bufferLockFlag = this.processEnglishLetter(context) || bufferLockFlag;
@@ -124,30 +124,30 @@ class LetterSegmenter implements ISegmenter {
 	 * @param context
 	 * @return
 	 */
-	private boolean processMixLetter(AnalyzeContext context){
+	private boolean processMixLetter(AnalyzeContextP context){
 		boolean needLock = false;
 		
 		if(this.start == -1){//当前的分词器尚未开始处理字符
-			if(CharacterUtil.CHAR_ARABIC == context.getCurrentCharType()
-					|| CharacterUtil.CHAR_ENGLISH == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ARABIC == context.getCurrentCharType()
+					|| CharacterUtilP.CHAR_ENGLISH == context.getCurrentCharType()){
 				//记录起始指针的位置,标明分词器进入处理状态
 				this.start = context.getCursor();
 				this.end = start;
 			}
 			
 		}else{//当前的分词器正在处理字符			
-			if(CharacterUtil.CHAR_ARABIC == context.getCurrentCharType()
-					|| CharacterUtil.CHAR_ENGLISH == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ARABIC == context.getCurrentCharType()
+					|| CharacterUtilP.CHAR_ENGLISH == context.getCurrentCharType()){
 				//记录下可能的结束位置
 				this.end = context.getCursor();
 				
-			}else if(CharacterUtil.CHAR_USELESS == context.getCurrentCharType()
+			}else if(CharacterUtilP.CHAR_USELESS == context.getCurrentCharType()
 						&& this.isLetterConnector(context.getCurrentChar())){
 				//记录下可能的结束位置
 				this.end = context.getCursor();
 			}else{
 				//遇到非Letter字符，输出词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , this.start , this.end - this.start + 1 , Lexeme.TYPE_LETTER);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , this.start , this.end - this.start + 1 , LexemeP.TYPE_LETTER);
 				context.addLexeme(newLexeme);
 				this.start = -1;
 				this.end = -1;
@@ -158,7 +158,7 @@ class LetterSegmenter implements ISegmenter {
 		if(context.isBufferConsumed()){
 			if(this.start != -1 && this.end != -1){
 				//缓冲以读完，输出词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , this.start , this.end - this.start + 1 , Lexeme.TYPE_LETTER);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , this.start , this.end - this.start + 1 , LexemeP.TYPE_LETTER);
 				context.addLexeme(newLexeme);
 				this.start = -1;
 				this.end = -1;
@@ -180,22 +180,22 @@ class LetterSegmenter implements ISegmenter {
 	 * @param context
 	 * @return
 	 */
-	private boolean processEnglishLetter(AnalyzeContext context){
+	private boolean processEnglishLetter(AnalyzeContextP context){
 		boolean needLock = false;
 		
 		if(this.englishStart == -1){//当前的分词器尚未开始处理英文字符	
-			if(CharacterUtil.CHAR_ENGLISH == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ENGLISH == context.getCurrentCharType()){
 				//记录起始指针的位置,标明分词器进入处理状态
 				this.englishStart = context.getCursor();
 				this.englishEnd = this.englishStart;
 			}
 		}else {//当前的分词器正在处理英文字符	
-			if(CharacterUtil.CHAR_ENGLISH == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ENGLISH == context.getCurrentCharType()){
 				//记录当前指针位置为结束位置
 				this.englishEnd =  context.getCursor();
 			}else{
 				//遇到非English字符,输出词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , this.englishStart , this.englishEnd - this.englishStart + 1 , Lexeme.TYPE_ENGLISH);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , this.englishStart , this.englishEnd - this.englishStart + 1 , LexemeP.TYPE_ENGLISH);
 				context.addLexeme(newLexeme);
 				this.englishStart = -1;
 				this.englishEnd= -1;
@@ -206,7 +206,7 @@ class LetterSegmenter implements ISegmenter {
 		if(context.isBufferConsumed()){
 			if(this.englishStart != -1 && this.englishEnd != -1){
 				//缓冲以读完，输出词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , this.englishStart , this.englishEnd - this.englishStart + 1 , Lexeme.TYPE_ENGLISH);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , this.englishStart , this.englishEnd - this.englishStart + 1 , LexemeP.TYPE_ENGLISH);
 				context.addLexeme(newLexeme);
 				this.englishStart = -1;
 				this.englishEnd= -1;
@@ -228,25 +228,25 @@ class LetterSegmenter implements ISegmenter {
 	 * @param context
 	 * @return
 	 */
-	private boolean processArabicLetter(AnalyzeContext context){
+	private boolean processArabicLetter(AnalyzeContextP context){
 		boolean needLock = false;
 		
 		if(this.arabicStart == -1){//当前的分词器尚未开始处理数字字符	
-			if(CharacterUtil.CHAR_ARABIC == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ARABIC == context.getCurrentCharType()){
 				//记录起始指针的位置,标明分词器进入处理状态
 				this.arabicStart = context.getCursor();
 				this.arabicEnd = this.arabicStart;
 			}
 		}else {//当前的分词器正在处理数字字符	
-			if(CharacterUtil.CHAR_ARABIC == context.getCurrentCharType()){
+			if(CharacterUtilP.CHAR_ARABIC == context.getCurrentCharType()){
 				//记录当前指针位置为结束位置
 				this.arabicEnd = context.getCursor();
-			}else if(CharacterUtil.CHAR_USELESS == context.getCurrentCharType()
+			}else if(CharacterUtilP.CHAR_USELESS == context.getCurrentCharType()
 					&& this.isNumConnector(context.getCurrentChar())){
 				//不输出数字，但不标记结束
 			}else{
 				////遇到非Arabic字符,输出词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() , this.arabicStart , this.arabicEnd - this.arabicStart + 1 , Lexeme.TYPE_ARABIC);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() , this.arabicStart , this.arabicEnd - this.arabicStart + 1 , LexemeP.TYPE_ARABIC);
 				context.addLexeme(newLexeme);
 				this.arabicStart = -1;
 				this.arabicEnd = -1;
@@ -257,7 +257,7 @@ class LetterSegmenter implements ISegmenter {
 		if(context.isBufferConsumed()){
 			if(this.arabicStart != -1 && this.arabicEnd != -1){
 				//生成已切分的词元
-				Lexeme newLexeme = new Lexeme(context.getBufferOffset() ,  this.arabicStart , this.arabicEnd - this.arabicStart + 1 , Lexeme.TYPE_ARABIC);
+				LexemeP newLexeme = new LexemeP(context.getBufferOffset() ,  this.arabicStart , this.arabicEnd - this.arabicStart + 1 , LexemeP.TYPE_ARABIC);
 				context.addLexeme(newLexeme);
 				this.arabicStart = -1;
 				this.arabicEnd = -1;

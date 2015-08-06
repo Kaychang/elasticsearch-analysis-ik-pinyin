@@ -43,7 +43,7 @@ import java.util.Stack;
  * @author linliangyi
  *
  */
-public class IKQueryExpressionParser {
+public class IKQueryExpressionParserP {
 	
 	//public static final String LUCENE_SPECIAL_CHAR = "&&||-()':={}[],";
 	
@@ -374,7 +374,7 @@ public class IKQueryExpressionParser {
 					}else if(':' == e2.type){
 						String keyword = e3.toString();
 						//SWMCQuery Here
-						Query _SWMCQuery =  SWMCQueryBuilder.create(e.toString(), keyword , quickMode);
+						Query _SWMCQuery =  SWMCQueryBuilderP.create(e.toString(), keyword , quickMode);
 						this.querys.push(_SWMCQuery);
 					}
 					
@@ -701,7 +701,7 @@ public class IKQueryExpressionParser {
 	}	
 
 	public static void main(String[] args){
-		IKQueryExpressionParser parser = new IKQueryExpressionParser();
+		IKQueryExpressionParserP parser = new IKQueryExpressionParserP();
 		//String ikQueryExp = "newsTitle:'的两款《魔兽世界》插件Bigfoot和月光宝盒'";
 		String ikQueryExp = "(id='ABcdRf' && date:{'20010101','20110101'} && keyword:'魔兽中国') || (content:'KSHT-KSH-A001-18'  || ulr='www.ik.com') - name:'林良益'";
 		Query result = parser.parseExp(ikQueryExp , true);

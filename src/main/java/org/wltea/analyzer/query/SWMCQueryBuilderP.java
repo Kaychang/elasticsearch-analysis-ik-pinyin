@@ -34,8 +34,8 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
-import org.wltea.analyzer.core.IKSegmenter;
-import org.wltea.analyzer.core.Lexeme;
+import org.wltea.analyzer.core.IKSegmenterP;
+import org.wltea.analyzer.core.LexemeP;
 
 /**
  * Single Word Multi Char Query Builder
@@ -43,7 +43,7 @@ import org.wltea.analyzer.core.Lexeme;
  * @author linliangyi
  *
  */
-public class SWMCQueryBuilder {
+public class SWMCQueryBuilderP {
 
 	/**
 	 * 生成SWMCQuery
@@ -57,7 +57,7 @@ public class SWMCQueryBuilder {
 			throw new IllegalArgumentException("参数 fieldName 、 keywords 不能为null.");
 		}
 		//1.对keywords进行分词处理
-		List<Lexeme> lexemes = doAnalyze(keywords);
+		List<LexemeP> lexemes = doAnalyze(keywords);
 		//2.根据分词结果，生成SWMCQuery
 		Query _SWMCQuery = getSWMCQuery(fieldName , lexemes , quickMode);
 		return _SWMCQuery;
@@ -68,12 +68,12 @@ public class SWMCQueryBuilder {
 	 * @param keywords
 	 * @return
 	 */
-	private static List<Lexeme> doAnalyze(String keywords){
-		List<Lexeme> lexemes = new ArrayList<Lexeme>();
+	private static List<LexemeP> doAnalyze(String keywords){
+		List<LexemeP> lexemes = new ArrayList<LexemeP>();
 
-		IKSegmenter ikSeg = new IKSegmenter(new StringReader(keywords));
+		IKSegmenterP ikSeg = new IKSegmenterP(new StringReader(keywords));
 		try{
-			Lexeme l = null;
+			LexemeP l = null;
 			while( (l = ikSeg.next()) != null){
 				lexemes.add(l);
 			}
@@ -91,7 +91,7 @@ public class SWMCQueryBuilder {
 	 * @param quickMode
 	 * @return
 	 */
-	private static Query getSWMCQuery(String fieldName , List<Lexeme> lexemes , boolean quickMode){
+	private static Query getSWMCQuery(String fieldName , List<LexemeP> lexemes , boolean quickMode){
 		//构造SWMC的查询表达式
 		StringBuffer keywordBuffer = new StringBuffer();
 		//精简的SWMC的查询表达式
@@ -103,7 +103,7 @@ public class SWMCQueryBuilder {
 		
 		int shortCount = 0;
 		int totalCount = 0;
-		for(Lexeme l : lexemes){
+		for(LexemeP l : lexemes){
 			totalCount += l.getLength();
 			//精简表达式
 			if(l.getLength() > 1){

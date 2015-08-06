@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 词典树分段，表示词典树的一个分枝
  */
-class DictSegment implements Comparable<DictSegment>{
+class DictSegmentP implements Comparable<DictSegmentP>{
 	
 	//公用字典表，存储汉字
 	private static final Map<Character , Character> charMap = new ConcurrentHashMap<Character , Character>(16 , 0.95f);
@@ -41,9 +41,9 @@ class DictSegment implements Comparable<DictSegment>{
 
 	
 	//Map存储结构
-	private Map<Character , DictSegment> childrenMap;
+	private Map<Character , DictSegmentP> childrenMap;
 	//数组方式存储结构
-	private DictSegment[] childrenArray;
+	private DictSegmentP[] childrenArray;
 	
 	
 	//当前节点上存储的字符
@@ -55,7 +55,7 @@ class DictSegment implements Comparable<DictSegment>{
 	private int nodeState = 0;	
 	
 	
-	DictSegment(Character nodeChar){
+	DictSegmentP(Character nodeChar){
 		if(nodeChar == null){
 			throw new IllegalArgumentException("参数为空异常，字符不能为空");
 		}
@@ -78,7 +78,7 @@ class DictSegment implements Comparable<DictSegment>{
 	 * @param charArray
 	 * @return Hit
 	 */
-	Hit match(char[] charArray){
+	HitP match(char[] charArray){
 		return this.match(charArray , 0 , charArray.length , null);
 	}
 	
@@ -89,7 +89,7 @@ class DictSegment implements Comparable<DictSegment>{
 	 * @param length
 	 * @return Hit 
 	 */
-	Hit match(char[] charArray , int begin , int length){
+	HitP match(char[] charArray , int begin , int length){
 		return this.match(charArray , begin , length , null);
 	}
 	
@@ -101,11 +101,11 @@ class DictSegment implements Comparable<DictSegment>{
 	 * @param searchHit
 	 * @return Hit 
 	 */
-	Hit match(char[] charArray , int begin , int length , Hit searchHit){
+	HitP match(char[] charArray , int begin , int length , HitP searchHit){
 		
 		if(searchHit == null){
 			//如果hit为空，新建
-			searchHit= new Hit();
+			searchHit= new HitP();
 			//设置hit的其实文本位置
 			searchHit.setBegin(begin);
 		}else{
@@ -116,16 +116,16 @@ class DictSegment implements Comparable<DictSegment>{
 		searchHit.setEnd(begin);
 
         Character keyChar = new Character(charArray[begin]);
-		DictSegment ds = null;
+		DictSegmentP ds = null;
 		
 		//引用实例变量为本地变量，避免查询时遇到更新的同步问题
-		DictSegment[] segmentArray = this.childrenArray;
-		Map<Character , DictSegment> segmentMap = this.childrenMap;		
+		DictSegmentP[] segmentArray = this.childrenArray;
+		Map<Character , DictSegmentP> segmentMap = this.childrenMap;		
 		
 		//STEP1 在节点中查找keyChar对应的DictSegment
 		if(segmentArray != null){
 			//在数组中查找
-			DictSegment keySegment = new DictSegment(keyChar);
+			DictSegmentP keySegment = new DictSegmentP(keyChar);
 			int position = Arrays.binarySearch(segmentArray, 0 , this.storeSize , keySegment);
 			if(position >= 0){
 				ds = segmentArray[position];
@@ -133,7 +133,7 @@ class DictSegment implements Comparable<DictSegment>{
 
 		}else if(segmentMap != null){
 			//在map中查找
-			ds = (DictSegment)segmentMap.get(keyChar);
+			ds = (DictSegmentP)segmentMap.get(keyChar);
 		}
 		
 		//STEP2 找到DictSegment，判断词的匹配状态，是否继续递归，还是返回结果
@@ -196,7 +196,7 @@ class DictSegment implements Comparable<DictSegment>{
 		}
 		
 		//搜索当前节点的存储，查询对应keyChar的keyChar，如果没有则创建
-		DictSegment ds = lookforSegment(keyChar , enabled);
+		DictSegmentP ds = lookforSegment(keyChar , enabled);
 		if(ds != null){
 			//处理keyChar对应的segment
 			if(length > 1){
@@ -217,15 +217,15 @@ class DictSegment implements Comparable<DictSegment>{
 	 * @param create  =1如果没有找到，则创建新的segment ; =0如果没有找到，不创建，返回null
 	 * @return
 	 */
-	private DictSegment lookforSegment(Character keyChar ,  int create){
+	private DictSegmentP lookforSegment(Character keyChar ,  int create){
 		
-		DictSegment ds = null;
+		DictSegmentP ds = null;
 
 		if(this.storeSize <= ARRAY_LENGTH_LIMIT){
 			//获取数组容器，如果数组未创建则创建数组
-			DictSegment[] segmentArray = getChildrenArray();			
+			DictSegmentP[] segmentArray = getChildrenArray();			
 			//搜寻数组
-			DictSegment keySegment = new DictSegment(keyChar);
+			DictSegmentP keySegment = new DictSegmentP(keyChar);
 			int position = Arrays.binarySearch(segmentArray, 0 , this.storeSize, keySegment);
 			if(position >= 0){
 				ds = segmentArray[position];
@@ -244,7 +244,7 @@ class DictSegment implements Comparable<DictSegment>{
 				}else{
 					//数组容量已满，切换Map存储
 					//获取Map容器，如果Map未创建,则创建Map
-					Map<Character , DictSegment> segmentMap = getChildrenMap();
+					Map<Character , DictSegmentP> segmentMap = getChildrenMap();
 					//将数组中的segment迁移到Map中
 					migrate(segmentArray ,  segmentMap);
 					//存储新的segment
@@ -259,12 +259,12 @@ class DictSegment implements Comparable<DictSegment>{
 			
 		}else{
 			//获取Map容器，如果Map未创建,则创建Map
-			Map<Character , DictSegment> segmentMap = getChildrenMap();
+			Map<Character , DictSegmentP> segmentMap = getChildrenMap();
 			//搜索Map
-			ds = (DictSegment)segmentMap.get(keyChar);
+			ds = (DictSegmentP)segmentMap.get(keyChar);
 			if(ds == null && create == 1){
 				//构造新的segment
-				ds = new DictSegment(keyChar);
+				ds = new DictSegmentP(keyChar);
 				segmentMap.put(keyChar , ds);
 				//当前节点存储segment数目+1
 				this.storeSize ++;
@@ -279,11 +279,11 @@ class DictSegment implements Comparable<DictSegment>{
 	 * 获取数组容器
 	 * 线程同步方法
 	 */
-	private DictSegment[] getChildrenArray(){
+	private DictSegmentP[] getChildrenArray(){
 		if(this.childrenArray == null){
 			synchronized(this){
 				if(this.childrenArray == null){
-					this.childrenArray = new DictSegment[ARRAY_LENGTH_LIMIT];
+					this.childrenArray = new DictSegmentP[ARRAY_LENGTH_LIMIT];
 				}
 			}
 		}
@@ -294,11 +294,11 @@ class DictSegment implements Comparable<DictSegment>{
 	 * 获取Map容器
 	 * 线程同步方法
 	 */	
-	private Map<Character , DictSegment> getChildrenMap(){
+	private Map<Character , DictSegmentP> getChildrenMap(){
 		if(this.childrenMap == null){
 			synchronized(this){
 				if(this.childrenMap == null){
-					this.childrenMap = new ConcurrentHashMap<Character, DictSegment>(ARRAY_LENGTH_LIMIT * 2,0.8f);
+					this.childrenMap = new ConcurrentHashMap<Character, DictSegmentP>(ARRAY_LENGTH_LIMIT * 2,0.8f);
 				}
 			}
 		}
@@ -309,8 +309,8 @@ class DictSegment implements Comparable<DictSegment>{
 	 * 将数组中的segment迁移到Map中
 	 * @param segmentArray
 	 */
-	private void migrate(DictSegment[] segmentArray , Map<Character , DictSegment> segmentMap){
-		for(DictSegment segment : segmentArray){
+	private void migrate(DictSegmentP[] segmentArray , Map<Character , DictSegmentP> segmentMap){
+		for(DictSegmentP segment : segmentArray){
 			if(segment != null){
 				segmentMap.put(segment.nodeChar, segment);
 			}
@@ -322,7 +322,7 @@ class DictSegment implements Comparable<DictSegment>{
 	 * @param o
 	 * @return int
 	 */
-	public int compareTo(DictSegment o) {
+	public int compareTo(DictSegmentP o) {
 		//对当前节点存储的char进行比较
 		return this.nodeChar.compareTo(o.nodeChar);
 	}

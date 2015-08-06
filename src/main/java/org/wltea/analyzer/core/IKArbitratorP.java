@@ -30,9 +30,9 @@ import java.util.TreeSet;
 /**
  * IK分词歧义裁决器
  */
-class IKArbitrator {
+class IKArbitratorP {
 
-	IKArbitrator(){
+	IKArbitratorP(){
 		
 	}
 	
@@ -41,11 +41,11 @@ class IKArbitrator {
 //	 * @param orgLexemes
 	 * @param useSmart
 	 */
-	void process(AnalyzeContext context , boolean useSmart){
-		QuickSortSet orgLexemes = context.getOrgLexemes();
-		Lexeme orgLexeme = orgLexemes.pollFirst();
+	void process(AnalyzeContextP context , boolean useSmart){
+		QuickSortSetP orgLexemes = context.getOrgLexemes();
+		LexemeP orgLexeme = orgLexemes.pollFirst();
 		
-		LexemePath crossPath = new LexemePath();
+		LexemePathP crossPath = new LexemePathP();
 		while(orgLexeme != null){
 			if(!crossPath.addCrossLexeme(orgLexeme)){
 				//找到与crossPath不相交的下一个crossPath	
@@ -55,14 +55,14 @@ class IKArbitrator {
 					context.addLexemePath(crossPath);
 				}else{
 					//对当前的crossPath进行歧义处理
-					QuickSortSet.Cell headCell = crossPath.getHead();
-					LexemePath judgeResult = this.judge(headCell, crossPath.getPathLength());
+					QuickSortSetP.Cell headCell = crossPath.getHead();
+					LexemePathP judgeResult = this.judge(headCell, crossPath.getPathLength());
 					//输出歧义处理结果judgeResult
 					context.addLexemePath(judgeResult);
 				}
 				
 				//把orgLexeme加入新的crossPath中
-				crossPath = new LexemePath();
+				crossPath = new LexemePathP();
 				crossPath.addCrossLexeme(orgLexeme);
 			}
 			orgLexeme = orgLexemes.pollFirst();
@@ -76,8 +76,8 @@ class IKArbitrator {
 			context.addLexemePath(crossPath);
 		}else{
 			//对当前的crossPath进行歧义处理
-			QuickSortSet.Cell headCell = crossPath.getHead();
-			LexemePath judgeResult = this.judge(headCell, crossPath.getPathLength());
+			QuickSortSetP.Cell headCell = crossPath.getHead();
+			LexemePathP judgeResult = this.judge(headCell, crossPath.getPathLength());
 			//输出歧义处理结果judgeResult
 			context.addLexemePath(judgeResult);
 		}
@@ -89,20 +89,20 @@ class IKArbitrator {
 	 * @param fullTextLength 歧义路径文本长度
 	 * @return
 	 */
-	private LexemePath judge(QuickSortSet.Cell lexemeCell , int fullTextLength){
+	private LexemePathP judge(QuickSortSetP.Cell lexemeCell , int fullTextLength){
 		//候选路径集合
-		TreeSet<LexemePath> pathOptions = new TreeSet<LexemePath>();
+		TreeSet<LexemePathP> pathOptions = new TreeSet<LexemePathP>();
 		//候选结果路径
-		LexemePath option = new LexemePath();
+		LexemePathP option = new LexemePathP();
 		
 		//对crossPath进行一次遍历,同时返回本次遍历中有冲突的Lexeme栈
-		Stack<QuickSortSet.Cell> lexemeStack = this.forwardPath(lexemeCell , option);
+		Stack<QuickSortSetP.Cell> lexemeStack = this.forwardPath(lexemeCell , option);
 		
 		//当前词元链并非最理想的，加入候选路径集合
 		pathOptions.add(option.copy());
 		
 		//存在歧义词，处理
-		QuickSortSet.Cell c = null;
+		QuickSortSetP.Cell c = null;
 		while(!lexemeStack.isEmpty()){
 			c = lexemeStack.pop();
 			//回滚词元链
@@ -122,10 +122,10 @@ class IKArbitrator {
 //	 * @param LexemePath path
 	 * @return
 	 */
-	private Stack<QuickSortSet.Cell> forwardPath(QuickSortSet.Cell lexemeCell , LexemePath option){
+	private Stack<QuickSortSetP.Cell> forwardPath(QuickSortSetP.Cell lexemeCell , LexemePathP option){
 		//发生冲突的Lexeme栈
-		Stack<QuickSortSet.Cell> conflictStack = new Stack<QuickSortSet.Cell>();
-		QuickSortSet.Cell c = lexemeCell;
+		Stack<QuickSortSetP.Cell> conflictStack = new Stack<QuickSortSetP.Cell>();
+		QuickSortSetP.Cell c = lexemeCell;
 		//迭代遍历Lexeme链表
 		while(c != null && c.getLexeme() != null){
 			if(!option.addNotCrossLexeme(c.getLexeme())){
@@ -142,7 +142,7 @@ class IKArbitrator {
 //	 * @param lexeme
 	 * @param l
 	 */
-	private void backPath(Lexeme l  , LexemePath option){
+	private void backPath(LexemeP l  , LexemePathP option){
 		while(option.checkCross(l)){
 			option.removeTail();
 		}

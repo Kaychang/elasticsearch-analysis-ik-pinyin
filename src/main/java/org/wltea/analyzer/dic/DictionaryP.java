@@ -47,36 +47,36 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
-import org.wltea.analyzer.cfg.Configuration;
+import org.wltea.analyzer.cfg.ConfigurationP;
 
 /**
  * 词典管理类,单子模式
  */
-public class Dictionary {
+public class DictionaryP {
 
 
 	/*
 	 * 词典单子实例
 	 */
-	private static Dictionary singleton;
+	private static DictionaryP singleton;
 
-    private DictSegment _MainDict;
+    private DictSegmentP _MainDict;
 
-    private DictSegment _SurnameDict;
+    private DictSegmentP _SurnameDict;
 
-    private DictSegment _QuantifierDict;
+    private DictSegmentP _QuantifierDict;
 
-    private DictSegment _SuffixDict;
+    private DictSegmentP _SuffixDict;
 
-    private DictSegment _PrepDict;
+    private DictSegmentP _PrepDict;
 
-    private DictSegment _StopWords;
+    private DictSegmentP _StopWords;
 
 	
 	/**
 	 * 配置对象
 	 */
-	private Configuration configuration;
+	private ConfigurationP configuration;
     public static ESLogger logger=Loggers.getLogger("ik-analyzer");
     
     private static ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
@@ -88,7 +88,7 @@ public class Dictionary {
     public static final String PATH_DIC_PREP = "ik/preposition.dic";
     public static final String PATH_DIC_STOP = "ik/stopword.dic";
     
-    private Dictionary(){
+    private DictionaryP(){
 
     }
 
@@ -100,11 +100,11 @@ public class Dictionary {
 	 * 该方法提供了一个在应用加载阶段就初始化字典的手段
 	 * @return Dictionary
 	 */
-	public static synchronized Dictionary initial(Configuration cfg){
+	public static synchronized DictionaryP initial(ConfigurationP cfg){
 		if(singleton == null){
-			synchronized(Dictionary.class){
+			synchronized(DictionaryP.class){
 				if(singleton == null){
-					singleton = new Dictionary();
+					singleton = new DictionaryP();
                     singleton.configuration=cfg;
                     singleton.loadMainDict();
                     singleton.loadSurnameDict();
@@ -116,10 +116,10 @@ public class Dictionary {
 	                //建立监控线程
 	                for(String location:cfg.getRemoteExtDictionarys()){
 	                	//10 秒是初始延迟可以修改的  60是间隔时间  单位秒
-	            		pool.scheduleAtFixedRate(new Monitor(location), 10, 60, TimeUnit.SECONDS);
+	            		pool.scheduleAtFixedRate(new MonitorP(location), 10, 60, TimeUnit.SECONDS);
 	                }
 	                for(String location:cfg.getRemoteExtStopWordDictionarys()){
-	            		pool.scheduleAtFixedRate(new Monitor(location), 10, 60, TimeUnit.SECONDS);
+	            		pool.scheduleAtFixedRate(new MonitorP(location), 10, 60, TimeUnit.SECONDS);
 	                }
 	                    
 	                return singleton;
@@ -133,7 +133,7 @@ public class Dictionary {
 	 * 获取词典单子实例
 	 * @return Dictionary 单例对象
 	 */
-	public static Dictionary getSingleton(){
+	public static DictionaryP getSingleton(){
 		if(singleton == null){
 			throw new IllegalStateException("词典尚未初始化，请先调用initial方法");
 		}
@@ -173,7 +173,7 @@ public class Dictionary {
 	 * 检索匹配主词典
 	 * @return Hit 匹配结果描述
 	 */
-	public Hit matchInMainDict(char[] charArray){
+	public HitP matchInMainDict(char[] charArray){
 		return singleton._MainDict.match(charArray);
 	}
 	
@@ -181,7 +181,7 @@ public class Dictionary {
 	 * 检索匹配主词典
 	 * @return Hit 匹配结果描述
 	 */
-	public Hit matchInMainDict(char[] charArray , int begin, int length){
+	public HitP matchInMainDict(char[] charArray , int begin, int length){
         return singleton._MainDict.match(charArray, begin, length);
 	}
 	
@@ -189,7 +189,7 @@ public class Dictionary {
 	 * 检索匹配量词词典
 	 * @return Hit 匹配结果描述
 	 */
-	public Hit matchInQuantifierDict(char[] charArray , int begin, int length){
+	public HitP matchInQuantifierDict(char[] charArray , int begin, int length){
 		return singleton._QuantifierDict.match(charArray, begin, length);
 	}
 	
@@ -198,8 +198,8 @@ public class Dictionary {
 	 * 从已匹配的Hit中直接取出DictSegment，继续向下匹配
 	 * @return Hit
 	 */
-	public Hit matchWithHit(char[] charArray , int currentIndex , Hit matchedHit){
-		DictSegment ds = matchedHit.getMatchedDictSegment();
+	public HitP matchWithHit(char[] charArray , int currentIndex , HitP matchedHit){
+		DictSegmentP ds = matchedHit.getMatchedDictSegment();
 		return ds.match(charArray, currentIndex, 1 , matchedHit);
 	}
 	
@@ -217,10 +217,10 @@ public class Dictionary {
 	 */
 	private void loadMainDict(){
 		//建立一个主词典实例
-		_MainDict = new DictSegment((char)0);
+		_MainDict = new DictSegmentP((char)0);
 
 		//读取主词典文件
-        File file= new File(configuration.getDictRoot(), Dictionary.PATH_DIC_MAIN);
+        File file= new File(configuration.getDictRoot(), DictionaryP.PATH_DIC_MAIN);
 
         InputStream is = null;
         try {
@@ -382,10 +382,10 @@ public class Dictionary {
 	 */
 	private void loadStopWordDict(){
 		//建立主词典实例
-        _StopWords = new DictSegment((char)0);
+        _StopWords = new DictSegmentP((char)0);
 
         //读取主词典文件
-        File file= new File(configuration.getDictRoot(), Dictionary.PATH_DIC_STOP);
+        File file= new File(configuration.getDictRoot(), DictionaryP.PATH_DIC_STOP);
 
         InputStream is = null;
         try {
@@ -491,9 +491,9 @@ public class Dictionary {
 	 */
 	private void loadQuantifierDict(){
 		//建立一个量词典实例
-		_QuantifierDict = new DictSegment((char)0);
+		_QuantifierDict = new DictSegmentP((char)0);
 		//读取量词词典文件
-        File file=new File(configuration.getDictRoot(),Dictionary.PATH_DIC_QUANTIFIER);
+        File file=new File(configuration.getDictRoot(),DictionaryP.PATH_DIC_QUANTIFIER);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
@@ -528,8 +528,8 @@ public class Dictionary {
 
     private void loadSurnameDict(){
 
-        _SurnameDict = new DictSegment((char)0);
-        File file=new File(configuration.getDictRoot(),Dictionary.PATH_DIC_SURNAME);
+        _SurnameDict = new DictSegmentP((char)0);
+        File file=new File(configuration.getDictRoot(),DictionaryP.PATH_DIC_SURNAME);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
@@ -565,8 +565,8 @@ public class Dictionary {
 
     private void loadSuffixDict(){
 
-        _SuffixDict = new DictSegment((char)0);
-        File file=new File(configuration.getDictRoot(),Dictionary.PATH_DIC_SUFFIX);
+        _SuffixDict = new DictSegmentP((char)0);
+        File file=new File(configuration.getDictRoot(),DictionaryP.PATH_DIC_SUFFIX);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
@@ -601,8 +601,8 @@ public class Dictionary {
 
     private void loadPrepDict(){
 
-        _PrepDict = new DictSegment((char)0);
-        File file=new File(configuration.getDictRoot(),Dictionary.PATH_DIC_PREP);
+        _PrepDict = new DictSegmentP((char)0);
+        File file=new File(configuration.getDictRoot(),DictionaryP.PATH_DIC_PREP);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
@@ -638,7 +638,7 @@ public class Dictionary {
     public void reLoadMainDict(){
     	logger.info("重新加载词典...");
 		// 新开一个实例加载词典，减少加载过程对当前词典使用的影响
-		Dictionary tmpDict = new Dictionary();
+		DictionaryP tmpDict = new DictionaryP();
 		tmpDict.configuration = getSingleton().configuration;
 		tmpDict.loadMainDict();
 		tmpDict.loadStopWordDict();

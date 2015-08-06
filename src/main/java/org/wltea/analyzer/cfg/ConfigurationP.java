@@ -13,7 +13,7 @@ import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.env.Environment;
 
-public class Configuration {
+public class ConfigurationP {
 
 	private static String FILE_NAME = "ik/IKAnalyzer.cfg.xml";
 	private static final String EXT_DICT = "ext_dict";
@@ -24,7 +24,7 @@ public class Configuration {
 	private Properties props;
     private Environment environment;
 
-    public  Configuration(Environment env){
+    public  ConfigurationP(Environment env){
         logger = Loggers.getLogger("ik-analyzer");
 		props = new Properties();
         environment = env;

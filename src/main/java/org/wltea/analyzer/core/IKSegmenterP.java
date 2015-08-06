@@ -25,8 +25,8 @@ package org.wltea.analyzer.core;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.wltea.analyzer.cfg.Configuration;
-import org.wltea.analyzer.dic.Dictionary;
+import org.wltea.analyzer.cfg.ConfigurationP;
+import org.wltea.analyzer.dic.DictionaryP;
 
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
@@ -35,23 +35,24 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IK分词器主类
  *
  */
-public final class IKSegmenter {
+public final class IKSegmenterP {
 	
 	//字符窜reader
 	private Reader input;
 	//分词器配置项
-	private Configuration cfg;
+	private ConfigurationP cfg;
 	//分词器上下文
-	private AnalyzeContext context;
+	private AnalyzeContextP context;
 	//分词处理器列表
-	private List<ISegmenter> segmenters;
+	private List<ISegmenterP> segmenters;
 	//分词歧义裁决器
-	private IKArbitrator arbitrator;
+	private IKArbitratorP arbitrator;
     private  boolean useSmart = false;
 	
 
@@ -59,15 +60,15 @@ public final class IKSegmenter {
 	 * IK分词器构造函数
 	 * @param input
      */
-	public IKSegmenter(Reader input , Settings settings, Environment environment){
+	public IKSegmenterP(Reader input , Settings settings, Environment environment){
 		this.input = input;
-		this.cfg = new Configuration(environment);
+		this.cfg = new ConfigurationP(environment);
         this.useSmart = settings.get("use_smart", "false").equals("true");
         this.init();
 	}
 	
-	public IKSegmenter(Reader input){
-		new IKSegmenter(input, null,null);
+	public IKSegmenterP(Reader input){
+		new IKSegmenterP(input, null,null);
 	}
 	
 //	/**
@@ -87,27 +88,27 @@ public final class IKSegmenter {
 	 */
 	private void init(){
 		//初始化词典单例
-		Dictionary.initial(this.cfg);
+		DictionaryP.initial(this.cfg);
 		//初始化分词上下文
-		this.context = new AnalyzeContext(useSmart);
+		this.context = new AnalyzeContextP(useSmart);
 		//加载子分词器
 		this.segmenters = this.loadSegmenters();
 		//加载歧义裁决器
-		this.arbitrator = new IKArbitrator();
+		this.arbitrator = new IKArbitratorP();
 	}
 	
 	/**
 	 * 初始化词典，加载子分词器实现
 	 * @return List<ISegmenter>
 	 */
-	private List<ISegmenter> loadSegmenters(){
-		List<ISegmenter> segmenters = new ArrayList<ISegmenter>(4);
+	private List<ISegmenterP> loadSegmenters(){
+		List<ISegmenterP> segmenters = new ArrayList<ISegmenterP>(4);
 		//处理字母的子分词器
-		segmenters.add(new LetterSegmenter()); 
+		segmenters.add(new LetterSegmenterP()); 
 		//处理中文数量词的子分词器
-		segmenters.add(new CN_QuantifierSegmenter());
+		segmenters.add(new CN_QuantifierSegmenterP());
 		//处理中文词的子分词器
-		segmenters.add(new CJKSegmenter());
+		segmenters.add(new CJKSegmenterP());
 		return segmenters;
 	}
 	
@@ -116,8 +117,8 @@ public final class IKSegmenter {
 	 * @return Lexeme 词元对象
 	 * @throws java.io.IOException
 	 */
-	public synchronized Lexeme next()throws IOException{
-		Lexeme l = null;
+	public synchronized LexemeP next()throws IOException{
+		LexemeP l = null;
 		while((l = context.getNextLexeme()) == null ){
 			/*
 			 * 从reader中读取数据，填充buffer
@@ -135,7 +136,7 @@ public final class IKSegmenter {
 				context.initCursor();
 				do{
         			//遍历子分词器
-        			for(ISegmenter segmenter : segmenters){
+        			for(ISegmenterP segmenter : segmenters){
         				segmenter.analyze(context);
         			}
         			//字符缓冲区接近读完，需要读入新的字符
@@ -145,7 +146,7 @@ public final class IKSegmenter {
    				//向前移动指针
 				}while(context.moveCursor());
 				//重置子分词器，为下轮循环进行初始化
-				for(ISegmenter segmenter : segmenters){
+				for(ISegmenterP segmenter : segmenters){
 					segmenter.reset();
 				}
 			}
@@ -159,15 +160,25 @@ public final class IKSegmenter {
 		
 		// 设置拼音token
 		if (l != null) {
-			if (Lexeme.TYPE_CNWORD == l.getLexemeType() ||
-					Lexeme.TYPE_CNCHAR == l.getLexemeType()) {
-				PinyinTokensHolder holder = new PinyinTokensHolder();
-				String pinyin = PinyinHelper.convertToPinyinString(l.getLexemeText(),
-						"", PinyinFormat.WITHOUT_TONE) + ",";
-				String pinyinTokens = holder.getPinyins();
-				pinyinTokens += pinyin;
-				holder.setPinyins(pinyinTokens);
+			String pinyin = PinyinHelper.convertToPinyinString(l.getLexemeText(),
+					"", PinyinFormat.WITHOUT_TONE);
+			
+			PinyinTokensHolder holder = new PinyinTokensHolder();
+			BeginMapping bm = holder.getBeginmapping();
+			Map<Integer, Integer> map = bm.getMapping();
+			Integer begin = l.getBegin();
+			if (!map.containsKey(begin)) {
+				int nextPinyinBegin = bm.getNextPinyinBegin();
+				map.put(begin, nextPinyinBegin);
+				bm.setMapping(map);
+				bm.setNextPinyinBegin(nextPinyinBegin + pinyin.length());
+				holder.setBeginmapping(bm);
 			}
+			
+			l.setBegin(map.get(begin));
+			l.setLength(pinyin.length());
+			l.setLexemeText(pinyin);
+			l.setLexemeType(LexemeP.TYPE_ENGLISH);
 		}
 		
 		return l;
@@ -180,7 +191,7 @@ public final class IKSegmenter {
 	public synchronized void reset(Reader input) {
 		this.input = input;
 		context.reset();
-		for(ISegmenter segmenter : segmenters){
+		for(ISegmenterP segmenter : segmenters){
 			segmenter.reset();
 		}
 	}

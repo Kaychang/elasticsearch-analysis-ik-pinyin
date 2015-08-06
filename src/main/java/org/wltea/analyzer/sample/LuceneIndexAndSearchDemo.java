@@ -48,7 +48,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.wltea.analyzer.lucene.IKAnalyzer;
+import org.wltea.analyzer.lucene.IKAnalyzerP;
 
 
 
@@ -75,7 +75,7 @@ public class LuceneIndexAndSearchDemo {
 		String text = "IK Analyzer是一个结合词典分词和文法分词的中文分词开源工具包。它使用了全新的正向迭代最细粒度切分算法。";
 		
 		//实例化IKAnalyzer分词器
-		Analyzer analyzer = new IKAnalyzer(true);
+		Analyzer analyzer = new IKAnalyzerP(true);
 		
 		Directory directory = null;
 		IndexWriter iwriter = null;
